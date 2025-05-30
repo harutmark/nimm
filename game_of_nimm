@@ -1,0 +1,187 @@
+import random
+
+STARTING_STONES = 20
+VALID_OPTIONS = [1, 2, 3]
+PROMPT = "Please enter 1, 2, or 3: "
+
+def main():
+    """
+    You should write your code here. 
+    """
+    display_title()
+    display_game_modes()
+    game_mode = safe_int_coercion(input(PROMPT))
+    if game_mode == 1:
+        print("You have chosen easy mode. Good Luck!")
+        print("Game Commencing...")
+        print()
+        random_ai_game()
+    elif game_mode == 2:
+        print("You have chosen hard mode. Good Luck!")
+        print("Game Commencing...")
+        print()
+        hard_ai_game()
+    else:
+        print("You have chosen multiplayer mode. Have Fun!")
+        print("Game Commencing...")
+        print()
+        multiplayer_game()
+
+def random_ai_game():
+    """
+    Runs a game of Nimm using a randomized AI
+    Human user always goes first
+    """
+    pile_count = STARTING_STONES
+    while pile_count > 0:
+        print(f"There are {pile_count} stones in the pile.")
+        pile_count = player_turn(pile_count)
+        print()
+        if pile_count == 0:
+            print("Game Over")
+            print("The Computer Wins")
+            print("Better Luck Next Time")
+            break
+        if pile_count % 3 == 0 and pile_count != 0:
+            print()
+            print(f"There are {pile_count} stones in the pile. Since the pile is divisible by three, you must go again.")
+            continue
+        pile_count = rand_computer_turn(pile_count)
+        while pile_count % 3 == 0 and pile_count != 0:
+            print(f"There are {pile_count} stones in the pile. Since the pile is divisible by 3 the computer must go again.")
+            print()
+            pile_count = rand_computer_turn(pile_count)
+        print()
+        if pile_count == 0:
+            print("Congratulations! You Win!")
+
+def hard_ai_game():
+    """
+    Runs a game of Nimm against a dificult ai
+    """
+    pile_count = STARTING_STONES
+    while pile_count > 0:
+        print(f"There are {pile_count} stones in the pile.")
+        pile_count = player_turn(pile_count)
+        print()
+        if pile_count == 0:
+            print("Game Over")
+            print("The Computer Wins")
+            print("Better Luck Next Time")
+            break
+        if pile_count % 3 == 0 and pile_count != 0:
+            print()
+            print(f"There are {pile_count} stones in the pile. Since the pile is divisible by three, you must go again.")
+            continue
+        pile_count = hard_computer_turn(pile_count)
+        while pile_count % 3 == 0 and pile_count != 0:
+            print(f"There are {pile_count} stones in the pile. Since the pile is divisible by 3 the computer must go again.")
+            print()
+            pile_count = hard_computer_turn(pile_count)
+        print()
+        if pile_count == 0:
+            print("Congratulations! You Win!")
+
+def multiplayer_game():
+    """
+    Runs a 2 players game of Nimm in the Terminal
+    """
+    pile_count = STARTING_STONES
+    player = 1
+    while pile_count > 0:
+        print(f"There are {pile_count} stones in the pile.")
+        print(f"Player {player}, would you like to remove 1, 2, or 3 stones? ")
+        pile_count = player_turn(pile_count)
+        if pile_count % 3 == 0 and pile_count != 0:
+            print(f"The pile is divisible by three. Thus, player {player} must go again.")
+            continue
+        player = 2 if player == 1 else 1
+        print()
+    print(f"Player {player} Wins! Congratulations!")
+    print("Game Over")
+
+def hard_computer_turn(pile_count):
+    print(f"There are {pile_count} stones in the pile.")
+    if pile_count == 3:
+        subtrahend = 2
+    elif (((pile_count - 3) % 3) == 0) and 3 < pile_count:
+        subtrahend = 3
+    elif (((pile_count - 2) % 3) == 0) and 2 < pile_count:
+        subtrahend = 2
+    else:
+        subtrahend = 1
+    print(f"The computer has chosen to remove {subtrahend} stones from the pile")
+    pile_count -= subtrahend
+    return pile_count
+
+def validate_input(user_input, pile_count):
+    """
+    Tests whether or not the user input is valid and returns a valid input.
+    Valid user inputs are integers 1, 2, or 3 and must be less than the nnumber of stones in the pile.
+    """
+    while user_input not in VALID_OPTIONS or user_input > pile_count:
+        if user_input not in VALID_OPTIONS:
+            user_input = safe_int_coercion(input(PROMPT))
+        if user_input > pile_count:
+            if pile_count == 1:
+                print(f"You cannot remove {user_input} when there is only 1 stone in the pile")
+            else:
+                print(f"You cannot remove {user_input} stones, when there are only {pile_count} stones in the pile.")
+            user_input = safe_int_coercion(input(PROMPT))
+    return user_input
+ 
+def safe_int_coercion(user_input):
+    """
+    Tries to coerce user input into an integer then returns the integer.
+    If unable, continually reprompts the user until an input that can be coerced into an integer is given.
+    """
+    while type(user_input) != int:
+        try:
+            user_input = int(user_input)
+        except ValueError:
+            user_input = input(PROMPT)
+    return user_input
+
+def player_turn(pile_count):
+    """
+    Argument: The current number of stones in the pile
+    Runs a human player turn by prompting how many stones the user would like to remove
+    and returns the new number of stones in the pile
+    """
+    subtrahend = input(PROMPT)
+    subtrahend = safe_int_coercion(subtrahend)
+    subtrahend = validate_input(subtrahend, pile_count)
+    pile_count -= subtrahend
+    return pile_count
+
+def rand_computer_turn(pile_count):
+    """
+    Has the computer randomly remove 1, 2, or 3 stones from the pile and returns the updated number of stones in the pile.
+    """
+    print(f"There are {pile_count} stones in the pile.")
+    subtrahend = 21
+    while subtrahend > pile_count:
+        subtrahend = random.randint(1, 3)
+    print(f"The computer has chosen to remove {subtrahend} stones from the pile")
+    pile_count -= subtrahend
+    return pile_count
+
+def display_title():
+    """
+    Prints a stylized Title for the Game
+    """
+    print()
+    print("~~~~~~~~~~~~~~~~~~~~~~~~")
+    print("The Ancient Game of Nimm")
+    print("~~~~~~~~~~~~~~~~~~~~~~~~")
+
+def display_game_modes():
+    print("Select your game mode:")
+    print("-_-_-_-_-_-_-_-_-_-_-_-_")
+    print("(1) Easy")
+    print("(2) Hard")
+    print("(3) Multiplayer")
+    print("-_-_-_-_-_-_-_-_-_-_-_-_")
+
+if __name__ == '__main__':
+    main()
